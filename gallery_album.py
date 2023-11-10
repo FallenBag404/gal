@@ -7,8 +7,9 @@ from PyQt5.QtGui import QPixmap
 
 
 class GalleryAlbum(QMainWindow):
-    def __init__(self, name_album):
+    def __init__(self, name_album, mw):
         super().__init__()
+        self.mw = mw
         self.connection = sqlite3.connect('my_first_data_base.sqlite')
         self.cursor = self.connection.cursor()
         self.setWindowTitle(f'Альбом: {name_album}')
@@ -30,7 +31,12 @@ class GalleryAlbum(QMainWindow):
         if event.key() == Qt.Key_Delete:
             self.cursor.execute(f'''DELETE from AlbumsList where Album_name == "{self.name_album}"''')
             self.connection.commit()
+            self.cursor.execute('SELECT album_name FROM AlbumsList')
+            ist = [row[0] for row in self.cursor.fetchall()]
             self.close()
+            self.mw.display_albums(ist)
+            self.connection.close()
+
 
     def add_photo(self):
         photo_info = QFileDialog.getOpenFileName(self, 'Выбрать картинку', '')
